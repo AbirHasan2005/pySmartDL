@@ -54,6 +54,8 @@ class SmartDL:
     :type urls: string or list of strings
     :param dest: Destination path. Default is `%TEMP%/pySmartDL/`.
     :type dest: string
+    :param file_name: Custom file name. Default is parsed from url.
+    :type file_name: string
     :param progress_bar: If True, prints a progress bar to the `stdout stream <http://docs.python.org/2/library/sys.html#sys.stdout>`_. Default is `True`.
     :type progress_bar: bool
 	:param fix_urls: If true, attempts to fix urls with unsafe characters.
@@ -81,7 +83,7 @@ class SmartDL:
             * If no path is provided, `%TEMP%/pySmartDL/` will be used.
     '''
     
-    def __init__(self, urls, dest=None, progress_bar=True, fix_urls=True, threads=5, timeout=5, logger=None, connect_default_logger=False, request_args=None, verify=True):
+    def __init__(self, urls, dest=None, progress_bar=True, fix_urls=True, threads=5, timeout=5, logger=None, connect_default_logger=False, request_args=None, verify=True, file_name=None):
         if logger:
             self.logger = logger
         elif connect_default_logger:
@@ -102,7 +104,8 @@ class SmartDL:
         self.url = self.mirrors.pop(0)
         self.logger.info('Using url "{}"'.format(self.url))
 
-        fn = urllib.parse.unquote(os.path.basename(urllib.parse.urlparse(self.url).path))
+        fn = file_name or urllib.request.urlopen(self.url).info().get_filename() or \
+	    urllib.parse.unquote(os.path.basename(urllib.parse.urlparse(self.url).path))
         self.dest = dest or os.path.join(tempfile.gettempdir(), 'pySmartDL', fn)
         if self.dest[-1] == os.sep:
             if os.path.exists(self.dest[:-1]) and os.path.isfile(self.dest[:-1]):
